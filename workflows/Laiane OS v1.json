@@ -1,0 +1,822 @@
+{
+  "name": "Laiane OS v1",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "Você é o Laiane OS.\n\nSeu papel é atuar como assistente pessoal, técnico e estratégico da Laiane.\n\nSeu objetivo é ajudá-la a aprender, organizar informações, desenvolver projetos e tomar boas decisões técnicas.\n\nSempre responda em português do Brasil.\n\n--------------------------------------------------\nCOMPORTAMENTO\n--------------------------------------------------\n\n- Seja objetivo.\n- Explique passo a passo quando necessário.\n- Evite respostas genéricas.\n- Compare alternativas quando houver mais de uma solução.\n- Nunca invente informações.\n- Quando houver incerteza, deixe isso explícito.\n- Baseie suas respostas em evidências sempre que possível.\n- Preserve a intenção original do usuário.\n- Sempre sugira um próximo passo quando fizer sentido.\n\nAo ensinar qualquer assunto:\n\n1. Explique o conceito.\n2. Explique por que ele existe.\n3. Explique quando utilizá-lo.\n4. Mostre a implementação.\n\nPrefira respostas curtas quando forem suficientes.\n\n--------------------------------------------------\nCONTEXTO\n--------------------------------------------------\n\nConsidere que Laiane trabalha principalmente com:\n\n- n8n\n- Inteligência Artificial\n- PostgreSQL\n- React\n- TypeScript\n- Python\n- Power BI\n- APIs\n- Automação\n- GitHub\n\nUtilize esse contexto quando ele ajudar na resposta.\n\n--------------------------------------------------\nUSO DAS FERRAMENTAS\n--------------------------------------------------\n\nAs ferramentas são a fonte de verdade.\n\nSempre que uma ferramenta puder responder com maior precisão do que seu conhecimento interno, utilize-a.\n\nNunca invente:\n\n- datas\n- horários\n- eventos\n- memórias\n- tarefas\n- resultados de consultas\n\nQuando uma ferramenta retornar informações, considere esse resultado como a fonte de verdade.\n\nNunca modifique ou complemente informações retornadas por uma ferramenta sem que exista justificativa explícita.\n\n--------------------------------------------------\nMEMÓRIA\n--------------------------------------------------\n\nConsidere memória como conhecimento permanente sobre o usuário.\n\nNunca trate tarefas, lembretes ou informações temporárias como memória permanente.\n\nQuando precisar responder utilizando informações já registradas, consulte a ferramenta apropriada.\n\n--------------------------------------------------\nPRINCÍPIOS\n--------------------------------------------------\n\nPrecisão é mais importante que velocidade.\n\nConsistência é mais importante que criatividade.\n\nNunca invente informações para completar respostas.\n\nQuando houver conflito entre seu conhecimento e uma ferramenta, priorize a ferramenta."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -400,
+        -160
+      ],
+      "id": "536b81ec-bc36-457d-8fed-87d13f6ae9f9",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -544,
+        32
+      ],
+      "id": "04184c97-a286-49b5-8e17-a0eaf4887a3f",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "oKwj3C2Bx2bRGoUr",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTimeTool",
+      "typeVersion": 2,
+      "position": [
+        560,
+        -160
+      ],
+      "id": "29a15fa1-77e0-4185-a7b2-81a32089eb6a",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Consulta endereços brasileiros pelo CEP.\n\nUse esta ferramenta sempre que o usuário pedir informações de um CEP.",
+        "url": "=https://viacep.com.br/ws/{{ $fromAI('cep') }}/json/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        560,
+        -16
+      ],
+      "id": "8bca396c-ff6f-49fb-889f-feca21d7a4bf",
+      "name": "ViaCEP"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Consulta eventos do Google Calendar.\n\nUse esta ferramenta sempre que o usuário perguntar sobre:\n\n- agenda\n- compromissos\n- reuniões\n- eventos\n- calendário\n- disponibilidade\n- horários livres\n\nConsulte o calendário antes de responder.\nNunca invente compromissos.",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "laiane.langa12@gmail.com",
+          "mode": "list",
+          "cachedResultName": "laiane.langa12@gmail.com"
+        },
+        "timeMax": "={{ $now.plus({ days: 7 }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        576,
+        144
+      ],
+      "id": "df69fd2f-53a8-4f25-9b24-4805c2f99b57",
+      "name": "Consulta Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "rJ4S4ZA6grK4Plad",
+          "name": "Google Calendar OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -400,
+        48
+      ],
+      "id": "a38217bf-4f49-4d74-829d-1e48598821e7",
+      "name": "Memória da conversa"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -656,
+        -160
+      ],
+      "id": "439c549f-3a9b-4b5f-8184-f307acffe802",
+      "name": "When chat message received",
+      "webhookId": "df56d95f-a568-43b6-b5ab-3179607fa1c1"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Registra uma informação permanente sobre o usuário.\n\nUtilize apenas para informações que devam ser lembradas em conversas futuras.\n\nExemplos:\n- Nome\n- Preferências\n- Objetivos\n- Projetos\n- Clientes\n- Tecnologias utilizadas\n\nNão utilize para tarefas, lembretes, conversas temporárias ou informações da conversa atual.",
+        "schema": {
+          "__rl": true,
+          "value": "assistant",
+          "mode": "list",
+          "cachedResultName": "assistant"
+        },
+        "table": {
+          "__rl": true,
+          "value": "memories",
+          "mode": "list",
+          "cachedResultName": "memories"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "category": "={{$fromAI(\n\"category\",\n\"Categoria da memória. Use Projeto, Preferência, Objetivo, Cliente, Trabalho, Pessoal ou Outro.\"\n)}}",
+            "user_id": "9fd26861-5532-4349-8a8a-70ffe4dd960d",
+            "content": "={{$fromAI(\n\"content\",\n\"Resumo curto da memória em português, sem inventar datas ou informações.\"\n)}}",
+            "metadata": "={{ JSON.stringify({}) }}",
+            "importance": "={{$fromAI(\n\"importance\",\n\"Importância da memória de 1 a 10. Nome, objetivos principais e projetos principais devem receber 10.\"\n)}}",
+            "memory_type": "={{$fromAI(\n\"memory_type\",\n\"Tipo da memória. Use apenas um destes valores: goal, preference, project, person, client, work, skill, fact.\"\n)}}",
+            "subject": "={{$fromAI(\n\"subject\",\n\"Assunto específico da memória. Exemplos: name, database, main_goal, employer, favorite_framework, current_project.\"\n)}}",
+            "value": "={{$fromAI(\n\"value\",\n\"Valor principal da memória. Apenas a informação essencial, sem adicionar contexto.\"\n)}}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "metadata",
+              "displayName": "metadata",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "importance",
+              "displayName": "importance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_accessed_at",
+              "displayName": "last_accessed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "memory_type",
+              "displayName": "memory_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "value",
+              "displayName": "value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "valid_from",
+              "displayName": "valid_from",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "valid_until",
+              "displayName": "valid_until",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        80,
+        112
+      ],
+      "id": "4f763811-a6a1-489c-b5f0-88a1b744d9df",
+      "name": "Registrar Memória",
+      "credentials": {
+        "postgres": {
+          "id": "wLcE3FZ69SLZwiKK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Cria uma nova tarefa para o usuário.\n\nUtilize quando o usuário pedir para:\n\n- criar uma tarefa\n- adicionar um afazer\n- lembrar de fazer algo\n- registrar um lembrete\n\nExtraia:\n\n- título\n- descrição\n- prioridade\n- categoria\n- data de vencimento\n\nNão utilize para salvar informações permanentes.\n\nSe o usuário não informar uma data de vencimento, não preencha o campo due_date.",
+        "schema": {
+          "__rl": true,
+          "value": "assistant",
+          "mode": "list",
+          "cachedResultName": "assistant"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tasks",
+          "mode": "list",
+          "cachedResultName": "tasks"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "user_id": "9fd26861-5532-4349-8a8a-70ffe4dd960d",
+            "title": "={{$fromAI(\n  \"title\",\n  \"Título curto da tarefa. Exemplo: Comprar café\"\n)}}",
+            "description": "={{$fromAI(\n  \"description\",\n  \"Descrição detalhada da tarefa. Pode ficar vazia.\"\n)}}",
+            "category": "={{$fromAI(\n  \"category\",\n  \"Categoria da tarefa. Use apenas: Trabalho, Estudos, Compras, Casa, Saúde ou Outros.\"\n)}}",
+            "priority": "={{$fromAI(\n  \"priority\",\n  \"Prioridade. Use somente HIGH, MEDIUM ou LOW.\"\n)}}",
+            "due_date": "={{$fromAI(\n\"due_date\",\n\"Data e hora de vencimento no formato ISO 8601 (YYYY-MM-DDTHH:mm:ssZ). Informe apenas se o usuário mencionar explicitamente uma data ou horário. Caso contrário, deixe este campo vazio.\"\n)}}",
+            "metadata": "={{ JSON.stringify({}) }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "priority",
+              "displayName": "priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "due_date",
+              "displayName": "due_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "completed_at",
+              "displayName": "completed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "metadata",
+              "displayName": "metadata",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        -240,
+        176
+      ],
+      "id": "ce573f68-5425-491b-81f7-c2fab9252eb7",
+      "name": "Registrar Tarefas",
+      "credentials": {
+        "postgres": {
+          "id": "wLcE3FZ69SLZwiKK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Pesquisa informações permanentes já registradas sobre o usuário.\n\nUtilize esta ferramenta SOMENTE quando precisar recuperar informações armazenadas anteriormente para responder ao usuário.\n\nExemplos:\n\n- \"Qual é o meu nome?\"\n- \"O que você lembra sobre mim?\"\n- \"Quais são meus objetivos?\"\n- \"Qual é meu projeto principal?\"\n- \"Quais tecnologias estou estudando?\"\n- \"O que você sabe sobre a Cupim Churrascaria?\"\n- \"Você lembra qual banco de dados estou usando?\"\n\nNão utilize esta ferramenta para:\n\n- Conversas casuais.\n- Perguntas de conhecimento geral.\n- Informações que já estejam na conversa atual.\n- Consultar tarefas ou agenda.\n- Confirmar informações que o usuário acabou de informar nesta mesma conversa.\n\nAo pesquisar, utilize apenas palavras-chave relevantes da pergunta do usuário. Evite pesquisar frases completas.",
+        "operation": "executeQuery",
+        "query": "SELECT\n    memory_type,\n    subject,\n    value,\n    category,\n    content,\n    importance\nFROM assistant.memories\nWHERE user_id = '9fd26861-5532-4349-8a8a-70ffe4dd960d'\nAND (\n    value ILIKE '%' || $1 || '%'\n    OR subject ILIKE '%' || $1 || '%'\n    OR content ILIKE '%' || $1 || '%'\n    OR category ILIKE '%' || $1 || '%'\n)\nORDER BY importance DESC, created_at DESC\nLIMIT 10;",
+        "options": {
+          "queryReplacement": "={{$fromAI(\"query\")}}"
+        }
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        192,
+        128
+      ],
+      "id": "ec15174d-4f4f-49f1-b855-77d21233d69f",
+      "name": "Pesquisar Memórias",
+      "credentials": {
+        "postgres": {
+          "id": "wLcE3FZ69SLZwiKK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Pesquisa tarefas do usuário.\n\nUtilize esta ferramenta sempre que o usuário desejar consultar tarefas existentes.\n\nExemplos:\n\n- Quais tarefas tenho?\n- O que preciso fazer?\n- Tenho tarefas pendentes?\n- Quais tarefas estão concluídas?\n- Quais tarefas vencem hoje?\n- Tenho tarefas de estudos?\n- Existe alguma tarefa relacionada ao PostgreSQL?\n\nExtraia apenas os filtros necessários.\n\nSe o usuário pedir todas as tarefas, deixe o parâmetro query vazio.\n\nNunca utilize esta ferramenta para criar, editar, concluir ou excluir tarefas.",
+        "operation": "executeQuery",
+        "query": "SELECT\n    id,\n    title,\n    description,\n    category,\n    priority,\n    status,\n    due_date,\n    created_at,\n    completed_at\nFROM assistant.tasks\nWHERE user_id = '9fd26861-5532-4349-8a8a-70ffe4dd960d'\nAND (\n    $1 = ''\n    OR title ILIKE '%' || $1 || '%'\n    OR description ILIKE '%' || $1 || '%'\n    OR category ILIKE '%' || $1 || '%'\n)\nORDER BY\nCASE\n    WHEN status = 'PENDING' THEN 1\n    WHEN status = 'COMPLETED' THEN 2\n    ELSE 3\nEND,\npriority DESC,\ndue_date ASC NULLS LAST;",
+        "options": {
+          "queryReplacement": "={{$fromAI(\n\"query\",\n\"Palavra-chave para localizar tarefas. Se o usuário pedir todas as tarefas, deixe vazio.\"\n)}}"
+        }
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        -144,
+        208
+      ],
+      "id": "8b558910-da5d-4c50-b2d9-65bab04126cd",
+      "name": "Pesquisar Tarefas",
+      "credentials": {
+        "postgres": {
+          "id": "wLcE3FZ69SLZwiKK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Atualiza uma tarefa existente.\n\nUtilize esta ferramenta quando o usuário solicitar alterar informações de uma tarefa.\n\nExemplos:\n\n- Alterar título.\n- Alterar descrição.\n- Alterar categoria.\n- Alterar prioridade.\n- Alterar data de vencimento.\n\nNunca utilize esta ferramenta para criar, concluir ou excluir tarefas.\n\nSempre utilize o ID da tarefa.",
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "value": "assistant",
+          "mode": "list",
+          "cachedResultName": "assistant"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tasks",
+          "mode": "list",
+          "cachedResultName": "tasks"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{$fromAI(\n\"id\",\n\"ID da tarefa que deve ser atualizada.\"\n)}}",
+            "title": "={{$fromAI(\n\"title\",\n\"Novo título da tarefa. Se não houver alteração deixe vazio.\"\n)}}",
+            "description": "={{$fromAI(\n\"description\",\n\"Nova descrição. Se não houver alteração deixe vazio.\"\n)}}",
+            "category": "={{$fromAI(\n\"category\",\n\"Nova categoria. Trabalho, Estudos, Compras, Casa, Saúde ou Outros. Se não houver alteração deixe vazio.\"\n)}}",
+            "priority": "={{$fromAI(\n\"priority\",\n\"Nova prioridade. HIGH, MEDIUM ou LOW. Se não houver alteração deixe vazio.\"\n)}}",
+            "due_date": "={{$fromAI(\n\"due_date\",\n\"Nova data de vencimento no formato YYYY-MM-DD. Se não houver alteração deixe vazio.\"\n)}}",
+            "updated_at": "={{ $now }}",
+            "user_id": "9fd26861-5532-4349-8a8a-70ffe4dd960d",
+            "metadata": "={{ JSON.stringify({}) }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "priority",
+              "displayName": "priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "due_date",
+              "displayName": "due_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "completed_at",
+              "displayName": "completed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "metadata",
+              "displayName": "metadata",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        -16,
+        224
+      ],
+      "id": "5eb91e76-f667-4d32-b5e1-eea064464aa1",
+      "name": "Atualizar Tarefa",
+      "credentials": {
+        "postgres": {
+          "id": "wLcE3FZ69SLZwiKK",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ViaCEP": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consulta Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memória da conversa": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Memória": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Tarefas": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pesquisar Memórias": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pesquisar Tarefas": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Tarefa": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "495396d4-7503-4d88-9bbb-9621bff7d331",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ab4334a777009d8e738ab74888569ee8c0de43a07dadf28b4fbc5c3633e256ea"
+  },
+  "nodeGroups": [],
+  "id": "ysfPEC9PSBIH3olM",
+  "tags": []
+}
