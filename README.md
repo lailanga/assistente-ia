@@ -30,38 +30,6 @@ Criar um assistente capaz de:
 
 ---
 
-## Arquitetura
-
-(imagem)
-
----
-
-## Fluxo
-
-WhatsApp
-
-↓
-
-Webhook Meta
-
-↓
-
-n8n
-
-↓
-
-OpenAI
-
-↓
-
-PostgreSQL
-
-↓
-
-Resposta para WhatsApp
-
----
-
 ## Roadmap
 
 - ✅ Sprint 1
