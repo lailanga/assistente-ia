@@ -39,15 +39,3 @@ Criar um assistente capaz de:
 - ⏳ Sprint 5
 
 ---
-
-## Como executar
-
-1. Clone
-
-2. docker compose up
-
-3. Importar workflows
-
-4. Configurar .env
-
-5. Configurar credenciais do n8n
